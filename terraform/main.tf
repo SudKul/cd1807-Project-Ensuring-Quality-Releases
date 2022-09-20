@@ -7,48 +7,61 @@ provider "azurerm" {
 }
 terraform {
   backend "azurerm" {
-    storage_account_name = ""
-    container_name       = ""
-    key                  = ""
-    access_key           = ""
+    storage_account_name = "tstate9592"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+    access_key           = "oBRnD6GLGNHDNORfrWOIx/xESUNfIk3zN0XLutDlH0X+QNue9qsTCxeV5P/EzxZgUpiw8FwTln+6+AStznWiEQ=="
   }
 }
-module "resource_group" {
-  source               = "../../modules/resource_group"
-  resource_group       = "${var.resource_group}"
-  location             = "${var.location}"
+locals {
+  tags = {
+    tier        = "${var.tier}"
+    deployment  = "${var.deployment}"
+  }
 }
 module "network" {
-  source               = "../../modules/network"
+  source               = "./modules/network"
   address_space        = "${var.address_space}"
   location             = "${var.location}"
   virtual_network_name = "${var.virtual_network_name}"
   application_type     = "${var.application_type}"
   resource_type        = "NET"
-  resource_group       = "${module.resource_group.resource_group_name}"
+  resource_group       = "${var.resource_group}"
   address_prefix_test  = "${var.address_prefix_test}"
 }
 
 module "nsg-test" {
-  source           = "../../modules/networksecuritygroup"
+  source           = "./modules/networksecuritygroup"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "NSG"
-  resource_group   = "${module.resource_group.resource_group_name}"
+  resource_group   = "${var.resource_group}"
   subnet_id        = "${module.network.subnet_id_test}"
   address_prefix_test = "${var.address_prefix_test}"
 }
+module "vm" {
+  source           = "./modules/vm"
+  location         = "${var.location}"
+  application_type = "${var.application_type}"
+  resource_type    = "VM"
+  resource_group   = "${var.resource_group}"
+  admin_username   = "${var.admin_username}"
+  vm_size          = "${var.vm_size}"
+  subnet_id        = "${module.network.subnet_id_test}"
+  public_ip_address_id = "${module.publicip.public_ip_address_id}"
+  tags             = "${local.tags}"
+}
 module "appservice" {
-  source           = "../../modules/appservice"
+  source           = "./modules/appservice"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "AppService"
-  resource_group   = "${module.resource_group.resource_group_name}"
+  resource_group   = "${var.resource_group}"
 }
 module "publicip" {
-  source           = "../../modules/publicip"
+  source           = "./modules/publicip"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "publicip"
-  resource_group   = "${module.resource_group.resource_group_name}"
+  resource_group   = "${var.resource_group}"
 }
