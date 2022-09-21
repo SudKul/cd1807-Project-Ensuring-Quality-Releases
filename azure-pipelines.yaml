@@ -12,6 +12,9 @@ pool: myAgentPool
 
 variables:
   python.version: '3.7.6'
+  # ToDo: Replace the service connection name as used in the DevOps project settings
+  azureServiceConnectionId: 'mySC'
+
 stages:
 - stage: Build
   jobs:
@@ -26,16 +29,19 @@ stages:
     - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
       displayName: 'Terrafom init'
       inputs:
+        # ToDo: Replace the resource group name, storgae account name, and container name below
         workingDirectory: '$(System.DefaultWorkingDirectory)/EnsuringQualityReleases/terraform/environments/test'
         backendServiceArm: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'  
-        backendAzureRmResourceGroupName: 'tstate'
-        backendAzureRmStorageAccountName: tstate1262321534
-        backendAzureRmContainerName: tstate
+        backendAzureRmResourceGroupName: 'Azuredevops'
+        backendAzureRmStorageAccountName: tfstate281845088
+        backendAzureRmContainerName: tfstate
         backendAzureRmKey: test.terraform.tfstate
+    
     - task: InstallSSHKey@0
+      # ToDo: Replace the IP and SSH public key below
       inputs:
-        knownHostsEntry: '192.168.1.89 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8grKjrrqx9hIL5BHaBqR/C/H2Y3f8LO0QzEVeDlkNaxijRkhi7x3EX5vtKYAv7Z5A3quVhM876hIZgvFBSNXFbfOFSMulYWa2eKxUoRbzQUuWUuRRgdl4XazFem9aont4qmB956wfTz6FX/R6++4VCiPjYBVq6IGpFgqjj80U7l1CImJVyTplaBKkNQVlFVFAPGVO2pLQdq1K882jIlOtlzfF/GD/9SWXcDZI8ykXBkNACgNl8Gfr5qkje5TJNOBSsW33c5MlgrbtI0FWJv/890XQUPwYFFu79pYhv4pDGC576hVo4GGYQXe1a36FgYHyJyXKCkCMzZb4QqVwjagd'
-        sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCv13g8O2VAujAz19wuj8m6pf5GnqJQKoNdar2TDRFgkNptcdwVVo+b1onBdP8ObJxd4CurA3o/txS5gOcQwrLJARDjoeUgdcYc5C+uk6/TyMusZe8o/GkvWVceTcpR4ZbXYQBYdYz0i3BlvEF7dJSyHAe3OttIcCGszAkLaKiTYHV8vt+R9FPgDtPJxNFaM+NyjZ9ZUpx0zwdIMIqywAmZmW1ssUKSYMB1qLhMSLdnTwJGUY2HKaufOXgRWkH/ekqg98CnNTOxzBXK4Gcj99Jw7KsNuSt6JMieREtJObogcYXavIlss6xWtmAgoYZ7Io4GS/yYuaTKDye956eh7wKx The Rig@The-Rig Ensuringqualityreleases123'
+        knownHostsEntry: '13.90.102.168 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNAA8UYYtNaf1MZdLVxebyZa4mcmqCQHqf/UD3vFek6aT449lC+4LMfKALnD+suG2sgEsgjbPEZoppYiHBYGJhoRUQvHz2G1J39luUDkz/JwGSXiULSPdYQ77g7nDN19I0OeQNxNiCtU/kGC+8FQ8Xb44TrxeeY9h9OYctzPvqNbq16Cf395iy0hx8zFBTqbeBIifHiEGsPtAW8xFKS7LeSd0JZKPlIwRMoVLrg8gdH8eiiQ9+E4D1/1cMxftkBTiFJTYJB1ifUmuejU3CRlpI3vGc/+puI5G5fMpOUSBlp2OyhQlCVWNkMojbhlluYUEYqEJf/96rmtmNNUbP6Loch0nMvehKpLHUD6l1qlWso2wH2Nw7YWR53rVvGrTQyRqFB98mLYxN4LAY15UPfL6ZAGRltq6xljkTfxtq5k7njhfnG4JjEtGyl47/h18P9yhurD+mc8I3Ou+996Tqt+GIovQvxqTFg+kjqL1psl31WZ9rqAMmSAIep0hra35dEu8='
+        sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNAA8UYYtNaf1MZdLVxebyZa4mcmqCQHqf/UD3vFek6aT449lC+4LMfKALnD+suG2sgEsgjbPEZoppYiHBYGJhoRUQvHz2G1J39luUDkz/JwGSXiULSPdYQ77g7nDN19I0OeQNxNiCtU/kGC+8FQ8Xb44TrxeeY9h9OYctzPvqNbq16Cf395iy0hx8zFBTqbeBIifHiEGsPtAW8xFKS7LeSd0JZKPlIwRMoVLrg8gdH8eiiQ9+E4D1/1cMxftkBTiFJTYJB1ifUmuejU3CRlpI3vGc/+puI5G5fMpOUSBlp2OyhQlCVWNkMojbhlluYUEYqEJf/96rmtmNNUbP6Loch0nMvehKpLHUD6l1qlWso2wH2Nw7YWR53rVvGrTQyRqFB98mLYxN4LAY15UPfL6ZAGRltq6xljkTfxtq5k7njhfnG4JjEtGyl47/h18P9yhurD+mc8I3Ou+996Tqt+GIovQvxqTFg+kjqL1psl31WZ9rqAMmSAIep0hra35dEu8='
         sshKeySecureFile: 'id_rsa'
     - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
       displayName: 'Terrafom apply'
@@ -45,7 +51,7 @@ stages:
         commandOptions: '-auto-approve'
         environmentServiceNameAzureRM: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'
         backendServiceArm: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'  
-        backendAzureRmResourceGroupName: 'tstate'
-        backendAzureRmStorageAccountName: tstate1262321534
-        backendAzureRmContainerName: tstate
+        backendAzureRmResourceGroupName: 'Azuredevops'
+        backendAzureRmStorageAccountName: tfstate281845088
+        backendAzureRmContainerName: tfstate
         backendAzureRmKey: test.terraform.tfstate
