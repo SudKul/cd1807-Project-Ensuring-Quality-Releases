@@ -58,9 +58,11 @@ stages:
     #     sshKeySecureFile: 'id_rsa'
     
     # Run Terraform Apply
+    # ToDo: Change the workingDirectory path, as applicable to you
     - task: TerraformTaskV3@3
       displayName: Terraform apply
       inputs:
         provider: 'azurerm'
         command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/cd1807-Project-Ensuring-Quality-Releases/terraform/environments/test'
         environmentServiceNameAzureRM: '$(azureServiceConnectionId)'
