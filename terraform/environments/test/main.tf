@@ -7,10 +7,10 @@ provider "azurerm" {
 }
 terraform {
   backend "azurerm" {
-    storage_account_name = "tstate9592"
+    storage_account_name = "tfstate281845088"
     container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-    access_key           = "oBRnD6GLGNHDNORfrWOIx/xESUNfIk3zN0XLutDlH0X+QNue9qsTCxeV5P/EzxZgUpiw8FwTln+6+AStznWiEQ=="
+    key                  = "test.terraform.tfstate"
+    access_key           = "N1a1czxUSWj7fQ7TDJdtCzDSm+W29c3VdxGfYH7DZIzL4PGOFzBxNpR9mS9UucphVzCgahCb5jM/+ASt0YhQrQ=="
   }
 }
 locals {
@@ -20,7 +20,7 @@ locals {
   }
 }
 module "network" {
-  source               = "./modules/network"
+  source               = "../../modules/network"
   address_space        = "${var.address_space}"
   location             = "${var.location}"
   virtual_network_name = "${var.virtual_network_name}"
@@ -31,7 +31,7 @@ module "network" {
 }
 
 module "nsg-test" {
-  source           = "./modules/networksecuritygroup"
+  source           = "../../modules/networksecuritygroup"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "NSG"
@@ -40,7 +40,7 @@ module "nsg-test" {
   address_prefix_test = "${var.address_prefix_test}"
 }
 module "vm" {
-  source           = "./modules/vm"
+  source           = "../../modules/vm"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "VM"
@@ -52,14 +52,14 @@ module "vm" {
   tags             = "${local.tags}"
 }
 module "appservice" {
-  source           = "./modules/appservice"
+  source           = "../../modules/appservice"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "AppService"
   resource_group   = "${var.resource_group}"
 }
 module "publicip" {
-  source           = "./modules/publicip"
+  source           = "../../modules/publicip"
   location         = "${var.location}"
   application_type = "${var.application_type}"
   resource_type    = "publicip"

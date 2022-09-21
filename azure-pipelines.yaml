@@ -1,4 +1,15 @@
 name: Azure Pipelines
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+trigger:
+- main
+
+# ToDo: Replace the agent pool name, if you are using Udacity Cloud lab. 
+# Otherwise comment out the line below. 
+pool: myAgentPool
+
 variables:
   python.version: '3.7.6'
 stages:
@@ -6,62 +17,35 @@ stages:
   jobs:
   - job: Build
     pool:
-      name: Hosted Ubuntu 1604
+      name: Hosted Ubuntu 1804
     steps:
-    # Needed for Terraform VM deployment
-    # - task: InstallSSHKey@0
-    #   inputs:
-    #     knownHostsEntry: 'KNOWN_HOSTS_STRING'
-    #     sshPublicKey: 'PUBLIC_KEY'
-    #     sshKeySecureFile: 'id_rsa'
-    - task: ArchiveFiles@2
-      displayName: 'Archive FakeRestAPI'
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+      displayName: 'Install Terraform'
       inputs:
-        rootFolderOrFile: 'path/to/fakerestapi'
-        includeRootFolder: false
-        archiveType: 'zip'
-        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip'
-    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId)-fakerestapi.zip
-      displayName: 'Upload Package'
-      artifact: drop-fakerestapi
-- stage:
-  jobs:
-  - deployment: FakeRestAPI
-    pool:
-      vmImage: 'Ubuntu-16.04'
-    environment: 'TEST'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureWebApp@1
-            displayName: 'Deploy Azure Web App'
-            inputs:
-              azureSubscription: ''
-              appName: ''
-              appType: webApp
-              package: $(Pipeline.Workspace)/drop-fakerestapi/$(Build.BuildId)-fakerestapi.zip
-  # - deployment: VMDeploy
-  #   displayName: NAME
-  #   environment:
-  #     name:  ENVIRONMENT NAME
-  #     resourceType: VirtualMachine
-  #     tags: TAG NAME
-  #   strategy:
-  #     runOnce:
-  #       deploy:
-  #         steps:
-  #         - task: Bash@3
-  #           inputs:
-  #             targetType: 'inline'
-  #             script: |
-  #               #! /bin/bash
-                
-  #               sudo apt-get upgrade -y
-  #               sudo apt-get install python3-pip -y
-  #               sudo apt-get install unzip -y
-  #               sudo apt-get install -y chromium-browser
-  #               pip3 install selenium
-  #               export PATH=$PATH:some/path
-
-
+        terraformVersion: 0.12.24
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      displayName: 'Terrafom init'
+      inputs:
+        workingDirectory: '$(System.DefaultWorkingDirectory)/EnsuringQualityReleases/terraform/environments/test'
+        backendServiceArm: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'  
+        backendAzureRmResourceGroupName: 'tstate'
+        backendAzureRmStorageAccountName: tstate1262321534
+        backendAzureRmContainerName: tstate
+        backendAzureRmKey: test.terraform.tfstate
+    - task: InstallSSHKey@0
+      inputs:
+        knownHostsEntry: '192.168.1.89 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8grKjrrqx9hIL5BHaBqR/C/H2Y3f8LO0QzEVeDlkNaxijRkhi7x3EX5vtKYAv7Z5A3quVhM876hIZgvFBSNXFbfOFSMulYWa2eKxUoRbzQUuWUuRRgdl4XazFem9aont4qmB956wfTz6FX/R6++4VCiPjYBVq6IGpFgqjj80U7l1CImJVyTplaBKkNQVlFVFAPGVO2pLQdq1K882jIlOtlzfF/GD/9SWXcDZI8ykXBkNACgNl8Gfr5qkje5TJNOBSsW33c5MlgrbtI0FWJv/890XQUPwYFFu79pYhv4pDGC576hVo4GGYQXe1a36FgYHyJyXKCkCMzZb4QqVwjagd'
+        sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCv13g8O2VAujAz19wuj8m6pf5GnqJQKoNdar2TDRFgkNptcdwVVo+b1onBdP8ObJxd4CurA3o/txS5gOcQwrLJARDjoeUgdcYc5C+uk6/TyMusZe8o/GkvWVceTcpR4ZbXYQBYdYz0i3BlvEF7dJSyHAe3OttIcCGszAkLaKiTYHV8vt+R9FPgDtPJxNFaM+NyjZ9ZUpx0zwdIMIqywAmZmW1ssUKSYMB1qLhMSLdnTwJGUY2HKaufOXgRWkH/ekqg98CnNTOxzBXK4Gcj99Jw7KsNuSt6JMieREtJObogcYXavIlss6xWtmAgoYZ7Io4GS/yYuaTKDye956eh7wKx The Rig@The-Rig Ensuringqualityreleases123'
+        sshKeySecureFile: 'id_rsa'
+    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+      displayName: 'Terrafom apply'
+      inputs:
+        command: apply
+        workingDirectory: '$(System.DefaultWorkingDirectory)/EnsuringQualityReleases/terraform/environments/test'
+        commandOptions: '-auto-approve'
+        environmentServiceNameAzureRM: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'
+        backendServiceArm: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'  
+        backendAzureRmResourceGroupName: 'tstate'
+        backendAzureRmStorageAccountName: tstate1262321534
+        backendAzureRmContainerName: tstate
+        backendAzureRmKey: test.terraform.tfstate

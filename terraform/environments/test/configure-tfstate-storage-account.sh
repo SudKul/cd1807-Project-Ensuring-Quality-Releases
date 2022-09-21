@@ -1,6 +1,6 @@
 #!/bin/bash
 RESOURCE_GROUP_NAME="Azuredevops"
-STORAGE_ACCOUNT_NAME="tstate$RANDOM"
+STORAGE_ACCOUNT_NAME="tfstate$RANDOM$RANDOM"
 CONTAINER_NAME="tfstate"
 
 # This command is not needed in the Udacity provided Azure account. 
@@ -16,8 +16,8 @@ export ARM_ACCESS_KEY=$ACCOUNT_KEY
 
 # Create blob container
 az storage container create --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME --account-key $ACCOUNT_KEY
-
-echo "storage_account_name: $STORAGE_ACCOUNT_NAME"
-echo "container_name: $CONTAINER_NAME"
-echo "access_key: $ACCOUNT_KEY"
+echo "RESOURCE_GROUP_NAME=$RESOURCE_GROUP_NAME"
+echo "STORAGE_ACCOUNT_NAME=$STORAGE_ACCOUNT_NAME"
+echo "CONTAINER_NAME=$CONTAINER_NAME"
+echo "ACCOUNT_KEY=$ACCOUNT_KEY"
 
