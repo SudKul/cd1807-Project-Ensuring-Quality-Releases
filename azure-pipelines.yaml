@@ -13,45 +13,42 @@ pool: myAgentPool
 variables:
   python.version: '3.7.6'
   # ToDo: Replace the service connection name as used in the DevOps project settings
-  azureServiceConnectionId: 'mySC'
+  azureServiceConnectionId: 'myServiceConnection'
 
 stages:
 - stage: Build
   jobs:
-  - job: Build
-    pool:
-      name: Hosted Ubuntu 1804
+  - job: BuildInfrastructure
     steps:
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
-      displayName: 'Install Terraform'
+    # Install Terraform on the pipeline agent 
+    - task: TerraformInstaller@0
+      displayName: 'Terrafom installation'
       inputs:
-        terraformVersion: 0.12.24
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
+        terraformVersion: '0.12.24'
+    
+    # Run Terraform Init on the pipeline agent 
+    # ToDo: Replace the resource group name, storage account name, and container name below
+    - task: TerraformTaskV3@3
       displayName: 'Terrafom init'
       inputs:
-        # ToDo: Replace the resource group name, storgae account name, and container name below
-        workingDirectory: '$(System.DefaultWorkingDirectory)/EnsuringQualityReleases/terraform/environments/test'
-        backendServiceArm: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'  
+        provider: 'azurerm'
+        command: 'init'
+        backendServiceArm: 'myServiceConnection'
         backendAzureRmResourceGroupName: 'Azuredevops'
-        backendAzureRmStorageAccountName: tfstate281845088
-        backendAzureRmContainerName: tfstate
-        backendAzureRmKey: test.terraform.tfstate
-    
+        backendAzureRmStorageAccountName: 'tfstate281845088'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'test.terraform.tfstate'
+    - task: TerraformTaskV3@3
+      displayName: Terraform validate
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+
+    # Install SSH Key on the agent to be used by the Terraform
+    # ToDo: Replace the IP and SSH public key below                    
     - task: InstallSSHKey@0
-      # ToDo: Replace the IP and SSH public key below
+      displayName: Install SSH Key
       inputs:
         knownHostsEntry: '13.90.102.168 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNAA8UYYtNaf1MZdLVxebyZa4mcmqCQHqf/UD3vFek6aT449lC+4LMfKALnD+suG2sgEsgjbPEZoppYiHBYGJhoRUQvHz2G1J39luUDkz/JwGSXiULSPdYQ77g7nDN19I0OeQNxNiCtU/kGC+8FQ8Xb44TrxeeY9h9OYctzPvqNbq16Cf395iy0hx8zFBTqbeBIifHiEGsPtAW8xFKS7LeSd0JZKPlIwRMoVLrg8gdH8eiiQ9+E4D1/1cMxftkBTiFJTYJB1ifUmuejU3CRlpI3vGc/+puI5G5fMpOUSBlp2OyhQlCVWNkMojbhlluYUEYqEJf/96rmtmNNUbP6Loch0nMvehKpLHUD6l1qlWso2wH2Nw7YWR53rVvGrTQyRqFB98mLYxN4LAY15UPfL6ZAGRltq6xljkTfxtq5k7njhfnG4JjEtGyl47/h18P9yhurD+mc8I3Ou+996Tqt+GIovQvxqTFg+kjqL1psl31WZ9rqAMmSAIep0hra35dEu8='
         sshPublicKey: 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDNAA8UYYtNaf1MZdLVxebyZa4mcmqCQHqf/UD3vFek6aT449lC+4LMfKALnD+suG2sgEsgjbPEZoppYiHBYGJhoRUQvHz2G1J39luUDkz/JwGSXiULSPdYQ77g7nDN19I0OeQNxNiCtU/kGC+8FQ8Xb44TrxeeY9h9OYctzPvqNbq16Cf395iy0hx8zFBTqbeBIifHiEGsPtAW8xFKS7LeSd0JZKPlIwRMoVLrg8gdH8eiiQ9+E4D1/1cMxftkBTiFJTYJB1ifUmuejU3CRlpI3vGc/+puI5G5fMpOUSBlp2OyhQlCVWNkMojbhlluYUEYqEJf/96rmtmNNUbP6Loch0nMvehKpLHUD6l1qlWso2wH2Nw7YWR53rVvGrTQyRqFB98mLYxN4LAY15UPfL6ZAGRltq6xljkTfxtq5k7njhfnG4JjEtGyl47/h18P9yhurD+mc8I3Ou+996Tqt+GIovQvxqTFg+kjqL1psl31WZ9rqAMmSAIep0hra35dEu8='
         sshKeySecureFile: 'id_rsa'
-    - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV1@0
-      displayName: 'Terrafom apply'
-      inputs:
-        command: apply
-        workingDirectory: '$(System.DefaultWorkingDirectory)/EnsuringQualityReleases/terraform/environments/test'
-        commandOptions: '-auto-approve'
-        environmentServiceNameAzureRM: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'
-        backendServiceArm: 'Azure subscription 1(692fcab2-2058-4429-b839-e86f873cdf50)'  
-        backendAzureRmResourceGroupName: 'Azuredevops'
-        backendAzureRmStorageAccountName: tfstate281845088
-        backendAzureRmContainerName: tfstate
-        backendAzureRmKey: test.terraform.tfstate
