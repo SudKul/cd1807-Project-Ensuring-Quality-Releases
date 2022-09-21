@@ -18,6 +18,7 @@ variables:
   projectRoot: $(System.DefaultWorkingDirectory)
   # Environment name
   environmentName: 'test'
+  ARM_THREEPOINTZERO_BETA_RESOURCES=true
 
 stages:
 - stage: Build
