@@ -18,7 +18,6 @@ variables:
   projectRoot: $(System.DefaultWorkingDirectory)
   # Environment name
   environmentName: 'test'
-  ARM_THREEPOINTZERO_BETA_RESOURCES=true
 
 stages:
 - stage: Build
@@ -29,7 +28,7 @@ stages:
     - task: TerraformInstaller@0
       displayName: 'Terrafom installation'
       inputs:
-        terraformVersion: '0.12.24'
+        terraformVersion: '1.2.9'
     
     # Run Terraform Init on the pipeline agent 
     # ToDo: Replace the resource group name, storage account name, and container name below
@@ -52,7 +51,7 @@ stages:
         provider: 'azurerm'
         command: 'validate'
 
-    # Upload SSH public key and private key file for Terraform VM deployment
+    # ToDo: Upload SSH public key and private key file for Terraform VM deployment
     # - task: InstallSSHKey@0
     #   inputs:
     #     knownHostsEntry: '13.90.102.168 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDROqEz5ZuxZi6Xd/p5678hgts9hvta2bsJhF6wfCryk0wBXV76wGzcE9f+udY/RNEcSPgiPqpdepLj8fmFRLrQWvO1G3c3r9Zyzqb/Ac0h7YcMI8QkgzsyEBVGvrpk+49uKdz04Qac/XkoMUmjM6i2U3l0mBTzsJfJ39O46f42XLrrku8Oq84lVFCoY/OtGtY41n9eaQ4JBYB6Sx3XIkJgGnqSZbhhFCvqaEZrD0CIn6T+7+DLT//+99ke89g7W+1/osLjnHuMcvzGrAaODv8gCcm8Qrq30i//up1XII1n7PLMLV+oBxtI6P/7Vpu303Gn6J8CUrEARdeBdH7DvqrpoII7bvJjH786NPPOqp8dxX4kh7fN3oBF3EXUwrdnnCLmEqmIKRsFMt74pyTKcdw+QKkZqMnVOocapOMUEjK4JVRMwuZZcQNS26Btc3tDXAMuW7g5lf/yoWsFqzu/dPlvtaH7OFKn+NlTWpvXMaKZy1eg/dEpIDvum4KPUT3xYEs= devopsagent@myLinuxVM'
@@ -68,3 +67,13 @@ stages:
         command: 'apply'
         workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
         environmentServiceNameAzureRM: '$(azureServiceConnectionId)'
+
+    # ToDo: Change the workingDirectory path, as applicable to you
+    # Destroy the resources in Azure
+    # - task: TerraformTaskV3@3
+    #   displayName: Terraform destroy
+    #   inputs:
+    #     provider: 'azurerm'
+    #     command: 'destroy'
+    #     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
+    #     environmentServiceNameAzureRM: '$(azureServiceConnectionId)'        
