@@ -64,5 +64,5 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'apply'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/cd1807-Project-Ensuring-Quality-Releases/terraform/environments/test'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform/environments/test'
         environmentServiceNameAzureRM: '$(azureServiceConnectionId)'
